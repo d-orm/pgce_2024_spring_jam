@@ -1,6 +1,8 @@
 #version 300 es
 precision highp float;
 
+// built upon from https://www.shadertoy.com/view/3ssXDj
+
 #include "uniforms"
 
 in vec2 fragCoord;

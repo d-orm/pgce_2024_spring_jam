@@ -5,10 +5,11 @@ class TempModes(Enum):
     COLD = auto()
     NORMAL = auto()
     HOT = auto()
+    INTRO = auto()
 
 
 class PowerUpTypes(StrEnum):
-    SLOW = auto()
+    FREEZE = auto()
     BOMB = auto()
     EXTRA_LIFE = auto()
     SCORE = auto()
@@ -22,11 +23,11 @@ class LevelData:
         "Level_3": 10, 
         "Level_4": 8, 
         "Level_5": 6, 
-        "Level_6": 4, 
-        "Level_7": 3, 
-        "Level_8": 2, 
-        "Level_9": 1, 
-        "Level_10": 0.5
+        "Level_6": 5, 
+        "Level_7": 5, 
+        "Level_8": 5, 
+        "Level_9": 5, 
+        "Level_10": 5
     }
     TEMP_CHANGE_FREQ = {
         "Level_1": 15, 
@@ -34,11 +35,11 @@ class LevelData:
         "Level_3": 10, 
         "Level_4": 8, 
         "Level_5": 6, 
-        "Level_6": 4, 
-        "Level_7": 3, 
-        "Level_8": 2, 
-        "Level_9": 1, 
-        "Level_10": 0.5
+        "Level_6": 5, 
+        "Level_7": 5, 
+        "Level_8": 5, 
+        "Level_9": 5, 
+        "Level_10": 5
     }
     FALLER_SPAWN_RATE = {
         "Level_1": 0.3, 
@@ -47,22 +48,22 @@ class LevelData:
         "Level_4": 0.05, 
         "Level_5": 0.04, 
         "Level_6": 0.03, 
-        "Level_7": 0.02, 
-        "Level_8": 0.01, 
-        "Level_9": 0.005, 
-        "Level_10": 0.0025
+        "Level_7": 0.025, 
+        "Level_8": 0.0225, 
+        "Level_9": 0.02, 
+        "Level_10": 0.0175
     }
     MIN_FALLER_SIZE = {
-        "Level_1": 8, 
-        "Level_2": 9, 
-        "Level_3": 10, 
-        "Level_4": 11, 
-        "Level_5": 12, 
-        "Level_6": 13, 
-        "Level_7": 14, 
-        "Level_8": 15, 
-        "Level_9": 16, 
-        "Level_10": 17
+        "Level_1": 12, 
+        "Level_2": 13, 
+        "Level_3": 14, 
+        "Level_4": 15, 
+        "Level_5": 16, 
+        "Level_6": 17, 
+        "Level_7": 18, 
+        "Level_8": 19, 
+        "Level_9": 20, 
+        "Level_10": 21
     }
     MAX_FALLER_SIZE = {
         "Level_1": 20, 
@@ -96,7 +97,7 @@ class LevelData:
         "Level_5": 280, 
         "Level_6": 300, 
         "Level_7": 320, 
-        "Level_8": 340, 
-        "Level_9": 360, 
-        "Level_10": 380
+        "Level_8": 330, 
+        "Level_9": 340, 
+        "Level_10": 350
     }

@@ -1,67 +1,86 @@
 #version 300 es
 precision highp float;
 
+// built upon from by https://www.shadertoy.com/view/lsX3z4
+
 #include "uniforms"
+#include "constants"
 
 in vec2 fragCoord;
 out vec4 fragColor;
 
-#define TWO_PI 6.28
-#define MAX_ITERATIONS 5
-#define INITIAL_INTENSITY .003
-#define TIME_OFFSET 23.0
-#define COLOR_BOOST 1.17
-#define COLOR_POWER 1.4
-#define INTENSITY_POWER 14.0
-#define SWIRL_STRENGTH 0.10515 // Strength of the swirl effect.
+const float distanceScaleFactor = 3.0;
+const float distanceExpFactor = -4.0;
+const float distanceOffset = 2.0;
+const float colorOffset = 2.0;
+const float colorExponentBase = 2.0;
 
-vec4 bgEffect(vec3 backgroundColor, float animationSpeed) {
-    vec2 textureCoordinates = fragCoord.xy - 0.5;
-    float adjustedTime = iTime * animationSpeed + TIME_OFFSET;
-
-    // Swirl effect
-    float distance = length(textureCoordinates - vec2(0., 0.)); // Distance from center
-    float angle = distance * SWIRL_STRENGTH * adjustedTime; // Angle for swirling based on distance and time
-    vec2 center = vec2(0.5, 0.5); // Center of the swirl
-    vec2 direction = textureCoordinates - center;
-    vec2 swirledCoordinates = vec2(
-        cos(angle) * direction.x - sin(angle) * direction.y,
-        sin(angle) * direction.x + cos(angle) * direction.y
-    ) + center;
-
-    vec2 wrappedCoordinates = mod(swirledCoordinates*TWO_PI, TWO_PI) - 250.0;
-    vec2 iterationCoordinates = vec2(wrappedCoordinates);
-    float colorIntensity = 1.0;
-    float baseIntensity = INITIAL_INTENSITY;
-
-    for (int iteration = 0; iteration < MAX_ITERATIONS; iteration++) {
-        float timeFactor = adjustedTime * (1.0 - (3.5 / float(iteration + 1)));
-        iterationCoordinates = wrappedCoordinates + vec2(cos(timeFactor - iterationCoordinates.x) + sin(timeFactor + iterationCoordinates.y), sin(timeFactor - iterationCoordinates.y) + cos(timeFactor + iterationCoordinates.x));
-        colorIntensity += 1.0/length(vec2(wrappedCoordinates.x / (sin(iterationCoordinates.x + timeFactor)/baseIntensity), wrappedCoordinates.y / (cos(iterationCoordinates.y + timeFactor)/baseIntensity)));
-    }
-    colorIntensity /= float(MAX_ITERATIONS);
-    colorIntensity = COLOR_BOOST - pow(colorIntensity, COLOR_POWER);
-    vec3 effectColor = vec3(pow(abs(colorIntensity), INTENSITY_POWER));
-    effectColor = clamp(effectColor + backgroundColor, 0.0, 1.0);
-    
-    return vec4(effectColor, 1.0);
+float calculateSquaredLength(vec2 position) {
+    return dot(position, position);
 }
 
+float generateNoise(vec2 position) {
+    return fract(sin(fract(sin(position.x) * (123.321)) + position.y) * 123.321);
+}
+
+float calculateWorleyNoise(vec2 position) {
+    float minDistance = 1e30;
+    for (int xOffset = -1; xOffset <= 1; ++xOffset)
+    for (int yOffset = -1; yOffset <= 1; ++yOffset) {
+        vec2 targetPosition = floor(position) + vec2(xOffset, yOffset);
+        minDistance = min(minDistance, calculateSquaredLength(position - targetPosition - vec2(generateNoise(targetPosition))));
+    }
+    return distanceScaleFactor * exp(distanceExpFactor * abs(distanceOffset * minDistance - 1.));
+}
+
+float calculateFractalWorleyNoise(vec2 position, float time) {
+    return sqrt(sqrt(sqrt(
+        pow(calculateWorleyNoise(position + time), 0.5) *
+        calculateWorleyNoise(position * 2. + vec2(1.3, 1.3) + time * vec2(.5, .5)) *
+        calculateWorleyNoise(position * 4. + vec2(2.3, 2.3) + time * vec2(.25, .25)) *
+        calculateWorleyNoise(position * 8. + vec2(3.3, 3.3) + time * vec2(.125, .125)) *
+        calculateWorleyNoise(position * 32. + vec2(4.3, 4.3) + time * vec2(.125, .125)) *
+        sqrt(calculateWorleyNoise(position * 64. + vec2(5.3, 5.3) + time * vec2(.0625, .0625))) *
+        sqrt(sqrt(calculateWorleyNoise(position * 24. + vec2(7.3, 7.3)))))));
+}
+
+vec4 generateColorOutput(vec2 uv, vec3 colorScale) {
+    float time = calculateFractalWorleyNoise(uv, iTime);
+    time *= exp(-calculateSquaredLength(abs(2. * uv - 1.)));
+    float radius = calculateSquaredLength(abs(2. * uv - 1.) * iResolution.xy);
+    vec4 finalColor = vec4(time * colorScale * vec3(1., time, colorOffset + pow(time, colorExponentBase - time)), 1.);
+    return finalColor;
+}
+
+vec2 swirlAndWarp(vec2 uv, float time) {
+    uv = (uv - 0.5) * 2.0;
+    float r = length(uv);
+    float a = atan(uv.y, uv.x);
+    float f = 1.0 / r;
+    f = pow(f, 0.5);
+    uv = vec2(cos(a + f), sin(a + f)) * r;
+    uv = (uv + 1.0) / 2.0;
+    return uv;
+}
 
 void main() {
+    vec2 uv = swirlAndWarp(fragCoord, iTime);
+
     if (iTempMode == 1.0) {
-        vec3 color = vec3(0.0, 0.75, 0.75);
-        fragColor = bgEffect(color, 0.2);        
+        vec3 colorScale = vec3(0.1, 1.0, 1.0);
+        fragColor = generateColorOutput(uv, colorScale);
         return;
     }
     if (iTempMode == 2.0) {
-        vec3 color = vec3(0.0, 0.5, 0.0);
-        fragColor = bgEffect(color, 0.7);        
+        vec3 colorScale = vec3(0.1, 1.0, 0.1);
+        fragColor = generateColorOutput(uv, colorScale);
         return;
     }
     if (iTempMode == 3.0) {
-        vec3 color = vec3(0.5, 0.0, 0.0);
-        fragColor = bgEffect(color, 1.5);        
+        vec3 colorScale = vec3(1.0, 0.1, 0.1);
+        fragColor = generateColorOutput(uv, colorScale);
         return;
     }
+    vec3 colorScale = vec3(1.0, 1.0, 1.0);
+    fragColor = generateColorOutput(uv, colorScale);
 }

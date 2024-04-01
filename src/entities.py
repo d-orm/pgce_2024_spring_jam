@@ -14,7 +14,9 @@ class TemperatureBar:
         self.background_color = (60, 60, 60, 100)
         self.image = image
         self.image = pg.transform.smoothscale(self.image, size)
-        self.rect = pg.Rect(self.pos, self.size)
+        self.image_rect = self.image.get_rect(topleft=pos)
+        self.fill_rect = pg.Rect(*pos, self.fill, size[1]//4)
+        self.fill_rect.y = pos[1] + size[1]//2 - self.fill_rect.h//2
         self.fill_ratio = self.fill / self.max_fill
         self.fill_rate = 0.01
         self.depletion_rate = 5.0
@@ -30,10 +32,9 @@ class TemperatureBar:
         self.fill_width = self.fill_ratio * self.size[0]
 
     def draw(self, screen: pg.Surface):
-        rect_coords = (*self.pos, self.fill_width, self.size[1])
-        pg.draw.rect(screen, self.fill_color, rect_coords)
+        self.fill_rect.w = self.fill_width
+        pg.draw.rect(screen, self.fill_color, self.fill_rect)
         screen.blit(self.image, self.pos)
-        # pg.draw.rect(screen, (255, 255, 255), self.rect, 2)
 
 
 class FallingThing(pg.sprite.Sprite):
@@ -79,20 +80,40 @@ class PowerUp(FallingThing):
     ):
         super().__init__(groups, pos, speed, image, screen_height)
         self.effect = effect
-
-    def update(self, dt):
-        self.pos.y += self.speed * dt
-        self.rect.y = round(self.pos.y)
-        if self.rect.y - self.rect.h > self.screen_height:
-            self.kill()
+        self.sideways_motion = False
 
 
 class Cursor(pg.sprite.Sprite):
     def __init__(self, groups, size, image):
         super().__init__(*groups)
         self.image = pg.transform.smoothscale(image, size)
-        self.rect = self.image.get_rect()
+        self.display_rect = self.image.get_rect()
+        self.rect = self.display_rect.inflate(-30, -30)
 
     def update(self, dt):
-        self.rect.center = pg.mouse.get_pos()
+        self.display_rect.center = pg.mouse.get_pos()
+        self.rect.center = self.display_rect.center
+
+    def draw(self, screen: pg.Surface):
+        screen.blit(self.image, self.display_rect)
         
+
+class InfoThing(pg.sprite.Sprite):
+    def __init__(self, groups, pos, dist_to_live: int, fade_speed: int, image: pg.Surface):
+        super().__init__(*groups)
+        self.pos = pos
+        self.dist_to_live = dist_to_live
+        self.fade_speed = fade_speed
+        self.image = image
+        self.rect = self.image.get_rect(midbottom=pos)
+        self.alpha = 255
+
+    def update(self, dt):
+        self.rect.y -= 50 * dt
+        self.alpha -= self.fade_speed * dt
+        self.image.set_alpha(self.alpha)
+        if self.rect.y < (self.pos[1] - self.dist_to_live):
+            self.kill()
+
+    def draw(self, screen: pg.Surface):
+        screen.blit(self.image, self.rect.topleft)

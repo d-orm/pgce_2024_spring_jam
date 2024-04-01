@@ -14,12 +14,15 @@ from src.shader_pipeline import ShaderPipeline
 class App:
     def __init__(self):
         self.screen_size = 1200, 800
-        self.screen = pg.display.set_mode(self.screen_size, pg.OPENGL | pg.DOUBLEBUF, vsync=True).convert_alpha()
+        try:
+            self.screen = pg.display.set_mode(self.screen_size, pg.OPENGL | pg.DOUBLEBUF, vsync=True).convert_alpha()
+        except:
+            self.screen = pg.display.set_mode(self.screen_size, pg.OPENGL | pg.DOUBLEBUF).convert_alpha()
         pg.mouse.set_visible(False)
         pg.mouse.set_relative_mode(True)
         pg.font.init()
         pg.mixer.init()
-        pg.display.set_caption("Temperature Game")
+        pg.display.set_caption("Atomic Convection")
         self.assets = Assets(self)        
         self.ctx = zengl.context()
         uniforms_map={
@@ -47,6 +50,18 @@ class App:
         self.game = Game(self)
         self.game_over = GameOver(self)
         self.state = "intro"
+        self.mute = False
+
+    def set_mute(self):
+        self.mute = not self.mute
+        if self.mute:
+            pg.mixer.music.pause()
+            for sfx in self.assets.sfx.values():
+                sfx["sound"].set_volume(0)
+        else:
+            pg.mixer.music.unpause()
+            for sfx in self.assets.sfx.values():
+                sfx["sound"].set_volume(sfx["volume"])
 
     async def run(self):
         pg.mixer.music.play(-1)
@@ -55,38 +70,37 @@ class App:
             self.elapsed_time = pg.time.get_ticks() / 1000.0
 
             for event in pg.event.get():
-                if event.type == pg.QUIT:
+                if event.type == pg.QUIT or (event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE):
                     pg.quit()
                     sys.exit() 
+                if event.type == pg.KEYDOWN:
+                    if event.key == pg.K_m:
+                        self.set_mute()
+                    if event.key == pg.K_SPACE:
+                        if self.state == "intro":
+                            self.state = "game"
+                        elif self.state == "game_over":
+                            self.state = "intro"
 
-            self.keys = pg.key.get_pressed()
             self.mouse_pos = pg.mouse.get_pos()
 
-            if self.keys[pg.K_ESCAPE]:
-                pg.quit()
-                sys.exit()
-
-            elif self.keys[pg.K_SPACE] and self.state == "intro":
-                self.state = "game"
-            elif self.keys[pg.K_SPACE] and self.state == "game_over":
-                self.game.reset()
-                self.state = "game"
-
             if self.state == "intro":
+                self.game.reset()
                 self.intro.run()
             elif self.state == "game" and self.game.lives >= 0:
                 self.game.run()
             elif self.state == "game" and self.game.lives < 0:
                 self.state = "game_over"
-            elif self.state == "game_over":
+
+            if self.state == "game_over":
                 self.last_score = self.game.score
                 self.last_level = self.game.level
                 self.game_over.run()
 
-           
             self.ctx.new_frame()
             self.bg_shader.render()
-            self.alert_effects_shader.render()
+            if self.state == "game":
+                self.alert_effects_shader.render()
             self.screen_shader.render(self.screen)
             self.ctx.end_frame() 
 

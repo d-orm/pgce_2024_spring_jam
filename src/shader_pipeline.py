@@ -14,9 +14,10 @@ class ShaderPipeline:
         self.uniforms, self.ufs_size, self.ufs_includes = self.pack_uniforms(uniforms_map)
         self.uniform_buffer = self.ctx.buffer(size=self.ufs_size)
         layout, resources = self.get_resources_and_layout()
+        constants = {"constants": f"const vec2 iResolution = vec2({self.app.screen_size[0]}.0, {self.app.screen_size[1]}.0);"}
 
         self.pipeline = self.ctx.pipeline(
-            includes=self.ufs_includes,
+            includes=constants|self.ufs_includes,
             vertex_shader=self.load_shader_src(f'{vert_shader_id}.vert'),
             fragment_shader=self.load_shader_src(f'{frag_shader_id}.frag'),
             layout=layout,
