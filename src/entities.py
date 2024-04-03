@@ -89,14 +89,31 @@ class Cursor(pg.sprite.Sprite):
         self.image = pg.transform.smoothscale(image, size)
         self.display_rect = self.image.get_rect()
         self.rect = self.display_rect.inflate(-30, -30)
+        glow_size = (self.display_rect.w * 2.5, self.display_rect.h * 2.5)
+        self.glow_surf = pg.Surface(glow_size, pg.SRCALPHA)
+        self.glow_rect = self.glow_surf.get_rect()
+        self.draw_gradient_circles()
 
     def update(self, dt):
         self.display_rect.center = pg.mouse.get_pos()
         self.rect.center = self.display_rect.center
+        self.glow_rect.center = self.rect.center
 
     def draw(self, screen: pg.Surface):
+        screen.blit(self.glow_surf, self.glow_rect)
         screen.blit(self.image, self.display_rect)
-        
+    
+    def draw_gradient_circles(self):
+        center_color = (140, 140, 0)
+        max_radius = self.glow_rect.w // 2
+        center = self.glow_rect.center
+
+        for radius in range(max_radius, 0, -2):
+            alpha = 5 * (1 - (radius / max_radius) ** 12)
+            color = center_color + (alpha,)
+            temp_surface = pg.Surface((max_radius*2, max_radius*2), pg.SRCALPHA)
+            pg.draw.circle(temp_surface, color, (max_radius, max_radius), radius)
+            self.glow_surf.blit(temp_surface, (center[0]-max_radius, center[1]-max_radius))
 
 class InfoText(pg.sprite.Sprite):
     def __init__(

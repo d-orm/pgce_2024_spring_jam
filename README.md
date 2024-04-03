@@ -7,7 +7,7 @@ An arcade style temperature themed mouse movement game, made for the Pygame-CE S
 Move the mouse to avoid falling elements & collect power-ups.
 Don't move too much or too little, or risk overheat or freeze!
 The atmospheric temperature will effect the heating/cooling rate.
-
+d
 ## Play Online
 https://djorm.itch.io/atomic-convection
 

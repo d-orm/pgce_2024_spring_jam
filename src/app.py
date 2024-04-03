@@ -79,7 +79,8 @@ class App:
                 sfx["sound"].set_volume(sfx["volume"])
 
     def handle_events(self, event: pg.Event):
-        any_input = event.type == pg.MOUSEBUTTONDOWN or event.type == pg.KEYDOWN
+        mouse_click = event.type == pg.MOUSEBUTTONDOWN and event.button == 1
+        any_input = mouse_click or event.type == pg.KEYDOWN
 
         if event.type == pg.QUIT or (event.type == pg.KEYDOWN and event.key == pg.K_q):
             self.state = "quitted"
