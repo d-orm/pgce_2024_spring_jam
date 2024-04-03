@@ -54,28 +54,28 @@ class LevelData:
         "Level_10": 0.0175
     }
     MIN_FALLER_SIZE = {
-        "Level_1": 12, 
-        "Level_2": 13, 
-        "Level_3": 14, 
-        "Level_4": 15, 
-        "Level_5": 16, 
-        "Level_6": 17, 
-        "Level_7": 18, 
-        "Level_8": 19, 
-        "Level_9": 20, 
-        "Level_10": 21
+        "Level_1": 20, 
+        "Level_2": 21, 
+        "Level_3": 22, 
+        "Level_4": 23, 
+        "Level_5": 24, 
+        "Level_6": 25, 
+        "Level_7": 26, 
+        "Level_8": 27, 
+        "Level_9": 28, 
+        "Level_10": 29
     }
     MAX_FALLER_SIZE = {
-        "Level_1": 20, 
-        "Level_2": 22, 
-        "Level_3": 24, 
-        "Level_4": 26, 
-        "Level_5": 26, 
-        "Level_6": 28, 
-        "Level_7": 30, 
-        "Level_8": 32, 
-        "Level_9": 34, 
-        "Level_10": 36
+        "Level_1": 30, 
+        "Level_2": 31, 
+        "Level_3": 32, 
+        "Level_4": 33, 
+        "Level_5": 34, 
+        "Level_6": 35, 
+        "Level_7": 36, 
+        "Level_8": 37, 
+        "Level_9": 38, 
+        "Level_10": 39
     }
     MIN_FALLER_SPEED = {
         "Level_1": 80, 

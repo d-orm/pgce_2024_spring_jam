@@ -17,13 +17,13 @@ class Assets:
         self.images: dict[str, pg.Surface] = {
             "title": pg.image.load("assets/images/title.png").convert_alpha(),
             "thermometer": pg.image.load("assets/images/thermometer.png").convert_alpha(),
-            "player": self.create_player_img(),
+            "player": pg.image.load("assets/images/player.png").convert_alpha(),
             "power_up": pg.image.load("assets/images/power_up.png").convert_alpha(),
             "lose_life": self.create_info_text("-1 Life", (255, 0, 0)),
             "score": self.create_info_text("+250 Score", (255, 255, 255)),
             "extra_life": self.create_info_text("+1 Life", (0, 255, 0)),
             "freeze": self.create_info_text("Freeze!", (150, 200, 255)),
-            "bomb": self.create_info_text("Bomb!", (255, 255, 0)),
+            "bomb": self.create_info_text("Explosion!", (255, 255, 0)),
             "too_hot": self.create_info_text("Overheating, slow down!", (200, 0, 0)),
             "too_cold": self.create_info_text("Overcooling, move around!", (0, 255, 255)),
             "atmo_hot": self.create_info_text("ATMOSPHERIC TEMPERATURE: HIGH", (150, 0, 0)),
@@ -47,12 +47,6 @@ class Assets:
             sfx_data["sound"].set_volume(sfx_data["volume"])
 
         pg.mixer.music.load("assets/music/moonlight_sonata.ogg")
-
-    def create_player_img(self) -> pg.Surface:
-        player_img = pg.image.load("assets/images/player.png").convert_alpha()    
-        player_img.set_colorkey((0, 0, 0))
-        player_img.convert_alpha()
-        return player_img
     
     def create_random_fallers(self) -> list[pg.Surface]:
         imgs = []

@@ -80,7 +80,7 @@ class Intro:
         text4_rect = text4.get_rect(center=(text_rect.centerx, text_rect.centery + 240))
         self.app.screen.blit(text4, text4_rect)
 
-        line_5 = "Press [M] to toggle mute, [Q] to quit"
+        line_5 = "Press [M] to toggle mute, [R] to restart, [Q] to quit"
         text5 = self.app.assets.fonts["roboto_mono"].render(line_5, True, (255, 255, 255))
         text5_rect = text5.get_rect(center=(text_rect.centerx, text_rect.centery + 340))
         self.app.screen.blit(text5, text5_rect)
@@ -134,3 +134,15 @@ class GameOver:
         text4 = self.app.assets.fonts["roboto_mono"].render(line_4, True, (255, 255, 255))
         text4_rect = text4.get_rect(center=(text_rect.centerx, text_rect.centery + 240))
         self.app.screen.blit(text4, text4_rect)
+
+
+class Quitted:
+    def __init__(self, app: "App"):
+        self.app = app
+
+    def run(self):
+        self.app.screen.fill((0, 0, 0, 255))
+        line_1 = "Thanks for playing!"
+        text = self.app.assets.fonts["roboto_mono"].render(line_1, True, (255, 255, 255))
+        text_rect = text.get_rect(center=self.app.screen.get_rect().center)
+        self.app.screen.blit(text, text_rect)

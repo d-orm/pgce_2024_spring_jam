@@ -35,12 +35,12 @@ class Game:
         self.reset()
 
     def create_temp_bar(self):
-        temp_bar_x = (self.app.screen_size[0] - self.app.screen_size[0] // 3) // 2
-        temp_bar_y = self.app.screen_size[1] // 16
-        temp_bar_w = self.app.screen_size[0] // 3
-        temp_bar_h = self.app.screen_size[1] // 8
+        x = (self.app.screen_size[0] - self.app.screen_size[0] // 3) // 2
+        y = self.app.screen_size[1] // 16
+        w = self.app.screen_size[0] // 3
+        h = self.app.screen_size[1] // 8
         image = self.app.assets.images["thermometer"]
-        return TemperatureBar((temp_bar_x, temp_bar_y), (temp_bar_w, temp_bar_h), image) 
+        return TemperatureBar((x, y), (w, h), image) 
 
     def increment_level(self):
         if self.time_elapsed - self.last_level_up_time >= self.level_inc_freq:
@@ -78,7 +78,8 @@ class Game:
 
     def draw_hud_text(self, screen: pg.Surface):
         font = self.app.assets.fonts["roboto_mono"]
-        level_text = font.render(f"Level: {self.level}", True, (255, 255, 255))
+        max_lvl = "(max)" if self.level == LevelData.MAX_LEVEL else ""
+        level_text = font.render(f"Level: {self.level}{max_lvl}", True, (255, 255, 255))
         score_text = font.render(f"Score: {self.score:.0f}", True, (255, 255, 255))
         lives_text = font.render(f"Lives: {self.lives}", True, (255, 255, 255))
         screen.blit(level_text, (10, 10))

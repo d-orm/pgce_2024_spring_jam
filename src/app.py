@@ -7,7 +7,7 @@ import asyncio
 
 from src.game import Game
 from src.assets_mgr import Assets
-from src.splash_screens import Intro, GameOver, Startup
+from src.splash_screens import Intro, GameOver, Quitted, Startup
 from src.shader_pipeline import ShaderPipeline
 
 
@@ -24,6 +24,7 @@ class App:
         self.intro = Intro(self)
         self.game = Game(self)
         self.game_over = GameOver(self)
+        self.quitted = Quitted(self)
         self.state = "startup"
         self.mute = False
         self.initialized = False
@@ -79,8 +80,12 @@ class App:
 
     def handle_events(self, event: pg.Event):
         any_input = event.type == pg.MOUSEBUTTONDOWN or event.type == pg.KEYDOWN
-        
+
         if event.type == pg.QUIT or (event.type == pg.KEYDOWN and event.key == pg.K_q):
+            self.state = "quitted"
+            self.quitted.run()
+            self.render()
+            pg.time.delay(1000)
             self.quit()
 
         elif any_input and not self.initialized:
@@ -91,6 +96,8 @@ class App:
         elif event.type == pg.KEYDOWN:
             if event.key == pg.K_m:
                 self.set_mute()
+            if event.key == pg.K_r:
+                self.game.reset()
             if event.key == pg.K_SPACE:
                 if self.state == "startup":
                     self.state = "intro"
