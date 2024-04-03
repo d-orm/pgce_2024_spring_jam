@@ -1,2 +1,2 @@
-pygame-ce==2.5.0
+pygame-ce==2.4.0
 zengl==2.4.1
