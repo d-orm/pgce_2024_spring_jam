@@ -13,13 +13,11 @@ class Assets:
         self.fonts = {
             "roboto_mono": pg.font.Font("assets/fonts/RobotoMono-Bold.ttf", 24),
         }    
-        player_img = pg.image.load("assets/images/player.png").convert_alpha()    
-        player_img.set_colorkey((0, 0, 0))
-        player_img.convert_alpha()
+
         self.images: dict[str, pg.Surface] = {
             "title": pg.image.load("assets/images/title.png").convert_alpha(),
             "thermometer": pg.image.load("assets/images/thermometer.png").convert_alpha(),
-            "player": player_img,
+            "player": self.create_player_img(),
             "power_up": pg.image.load("assets/images/power_up.png").convert_alpha(),
             "lose_life": self.create_info_text("-1 Life", (255, 0, 0)),
             "score": self.create_info_text("+250 Score", (255, 255, 255)),
@@ -50,6 +48,12 @@ class Assets:
 
         pg.mixer.music.load("assets/music/moonlight_sonata.ogg")
 
+    def create_player_img(self) -> pg.Surface:
+        player_img = pg.image.load("assets/images/player.png").convert_alpha()    
+        player_img.set_colorkey((0, 0, 0))
+        player_img.convert_alpha()
+        return player_img
+    
     def create_random_fallers(self) -> list[pg.Surface]:
         imgs = []
         rots = [random.randint(0, 360) for _ in range(20)]
@@ -62,4 +66,4 @@ class Assets:
         return imgs
     
     def create_info_text(self, text: str, color: tuple[int]) -> pg.Surface:
-        return self.fonts["roboto_mono"].render(text, True, color)
+        return self.fonts["roboto_mono"].render(text, True, color).convert_alpha()

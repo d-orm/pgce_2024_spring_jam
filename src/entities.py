@@ -1,22 +1,25 @@
 import math
-import random
 
 import pygame as pg
 
 
 class TemperatureBar:
-    def __init__(self, pos, size, image: pg.Surface):
+    def __init__(
+            self, 
+            pos: tuple, 
+            size: tuple, 
+            image: pg.Surface
+        ):
         self.pos = pos
         self.size = size
         self.fill = 50
         self.max_fill = 100
-        self.fill_color = (255, 55, 55)
-        self.background_color = (60, 60, 60, 100)
+        self.fill_color = (225, 55, 55)
         self.image = image
         self.image = pg.transform.smoothscale(self.image, size)
         self.image_rect = self.image.get_rect(topleft=pos)
-        self.fill_rect = pg.Rect(*pos, self.fill, size[1]//4)
-        self.fill_rect.y = pos[1] + size[1]//2 - self.fill_rect.h//2
+        self.fill_rect = pg.Rect(*pos, self.fill, size[1] // 4)
+        self.fill_rect.y = pos[1] + size[1] // 2 - self.fill_rect.h // 2
         self.fill_ratio = self.fill / self.max_fill
         self.fill_rate = 0.01
         self.depletion_rate = 5.0
@@ -69,22 +72,19 @@ class FallingThing(pg.sprite.Sprite):
 
 
 class PowerUp(FallingThing):
-    def __init__(
-        self, 
-        groups: list[pg.sprite.Group], 
-        pos: tuple, 
-        speed: int, 
-        image: pg.Surface, 
-        screen_height: int,
-        effect: str
-    ):
-        super().__init__(groups, pos, speed, image, screen_height)
+    def __init__(self, *args, effect: str, **kwargs):
+        super().__init__(*args, **kwargs)
         self.effect = effect
         self.sideways_motion = False
 
 
 class Cursor(pg.sprite.Sprite):
-    def __init__(self, groups, size, image):
+    def __init__(
+            self, 
+            groups: list[pg.sprite.Group], 
+            size: tuple, 
+            image: pg.Surface
+        ):
         super().__init__(*groups)
         self.image = pg.transform.smoothscale(image, size)
         self.display_rect = self.image.get_rect()
@@ -98,8 +98,15 @@ class Cursor(pg.sprite.Sprite):
         screen.blit(self.image, self.display_rect)
         
 
-class InfoThing(pg.sprite.Sprite):
-    def __init__(self, groups, pos, dist_to_live: int, fade_speed: int, image: pg.Surface):
+class InfoText(pg.sprite.Sprite):
+    def __init__(
+            self, 
+            groups: list[pg.sprite.Group], 
+            pos: tuple, 
+            dist_to_live: int, 
+            fade_speed: int, 
+            image: pg.Surface
+        ):
         super().__init__(*groups)
         self.pos = pos
         self.dist_to_live = dist_to_live

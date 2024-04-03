@@ -5,7 +5,7 @@ import time
 
 import pygame as pg
 
-from src.entities import Cursor, InfoThing, FallingThing, PowerUp, TemperatureBar
+from src.entities import Cursor, InfoText, FallingThing, PowerUp, TemperatureBar
 from src.level_data import LevelData, PowerUpTypes, TempModes
 
 if TYPE_CHECKING:
@@ -32,6 +32,7 @@ class Game:
             TempModes.NORMAL: 0.02,
             TempModes.HOT: 0.05
         }
+        self.reset()
 
     def create_temp_bar(self):
         temp_bar_x = (self.app.screen_size[0] - self.app.screen_size[0] // 3) // 2
@@ -56,7 +57,7 @@ class Game:
         self.all_sprites.update(dt)
         self.temp_bar.update(dt)
         self.cursor_collision_logic()
-        self.temp_mode_logic()
+        self.cycle_temp_mode()
         self.temp_bar_logic()
 
     def increment_timers(self, dt):
@@ -68,16 +69,6 @@ class Game:
         self.time_since_last_temp_change += dt
         self.time_since_last_power_up += dt
 
-    def draw_temp_warning(self):
-        if self.temp_bar.fill < 20:
-            img = self.app.assets.images["too_cold"]
-            pos = (self.app.screen_size[0] // 2 - img.get_width()//2, 0)
-            self.app.screen.blit(img, pos)
-        if self.temp_bar.fill > 80:
-            img = self.app.assets.images["too_hot"]
-            pos = (self.app.screen_size[0] // 2 - img.get_width()//2, 0)
-            self.app.screen.blit(img, pos)
-
     def draw(self, screen: pg.Surface):
         screen.fill((0, 0, 0, 0))
         for spr in self.all_sprites:
@@ -86,34 +77,41 @@ class Game:
         self.draw_hud_text(screen)
 
     def draw_hud_text(self, screen: pg.Surface):
-        level_text = self.app.assets.fonts["roboto_mono"].render(f"Level: {self.level}", True, (255, 255, 255))
-        score_text = self.app.assets.fonts["roboto_mono"].render(f"Score: {self.score:.0f}", True, (255, 255, 255))
-        lives_text = self.app.assets.fonts["roboto_mono"].render(f"Lives: {self.lives}", True, (255, 255, 255))
+        font = self.app.assets.fonts["roboto_mono"]
+        level_text = font.render(f"Level: {self.level}", True, (255, 255, 255))
+        score_text = font.render(f"Score: {self.score:.0f}", True, (255, 255, 255))
+        lives_text = font.render(f"Lives: {self.lives}", True, (255, 255, 255))
         screen.blit(level_text, (10, 10))
         screen.blit(score_text, (10, 40))
         screen.blit(lives_text, (10, 70))
 
         atmo_text = self.app.assets.images[f"atmo_{self.curr_temp_mode.name.lower()}"]
-        x_pos = self.app.screen_size[0] // 2 - atmo_text.get_width()//2
-        y_pos = self.app.screen_size[1] - atmo_text.get_height()
+        x_pos = self.app.screen_size[0] // 2 - atmo_text.get_width() // 2
+        y_pos = self.app.screen_size[1] - atmo_text.get_height() * 2
         screen.blit(atmo_text, (x_pos, y_pos))
 
     def run(self):
         self.update(self.app.dt)
         self.draw(self.app.screen)
 
-    def temp_mode_logic(self):
+    def cycle_temp_mode(self):
         if self.curr_temp_mode == TempModes.INTRO:
             self.curr_temp_mode = TempModes.NORMAL
+
         if self.time_since_last_temp_change >= self.temp_change_freq:
             self.app.assets.sfx["temp_change"]["sound"].play()
-            self.curr_temp_mode = random.choice([temp for temp in self.temp_modes if temp != self.curr_temp_mode])
-            print(f"{self.time_elapsed} Temp mode changed to {self.curr_temp_mode}")
+            temp_modes = [t for t in self.temp_modes if t != self.curr_temp_mode]
+            self.curr_temp_mode = random.choice(temp_modes)
             self.temp_bar.depletion_rate = self.depletion_rates[self.curr_temp_mode]
             self.temp_bar.fill_rate = self.fill_rates[self.curr_temp_mode]
             self.time_since_last_temp_change = 0
 
     def temp_bar_logic(self):
+        self.heat_up_from_mouse()
+        self.lose_life_from_temp()
+        self.temp_alerts()
+
+    def heat_up_from_mouse(self):
         if self.time_since_last_move >= 0.01:
             x_dist = self.app.mouse_pos[0] - self.last_mouse_pos[0]
             y_dist = self.app.mouse_pos[1] - self.last_mouse_pos[1]
@@ -123,20 +121,24 @@ class Game:
         else:
             self.temp_bar.distance_moved = 0
 
+    def lose_life_from_temp(self):
+        lose_life_img = self.app.assets.images["lose_life"]
+        lose_life_snd = self.app.assets.sfx["lose_life"]["sound"]
+        pos = self.cursor.rect.midtop
+
         if self.temp_bar.fill > self.temp_bar.max_fill:
-            print("Overheated!")
             self.temp_bar.fill = 50
-            InfoThing([self.all_sprites], self.cursor.rect.midtop, 100, 100, self.app.assets.images["lose_life"])
+            InfoText([self.all_sprites], pos, 100, 100, lose_life_img)
             self.lives -= 1
-            self.app.assets.sfx["lose_life"]["sound"].play()
+            lose_life_snd.play()
 
         if self.temp_bar.fill < 0:
-            print("Frozen!")
             self.temp_bar.fill = 50
-            InfoThing([self.all_sprites], self.cursor.rect.midtop, 100, 100, self.app.assets.images["lose_life"])
+            InfoText([self.all_sprites], pos, 100, 100, lose_life_img)
             self.lives -= 1
-            self.app.assets.sfx["lose_life"]["sound"].play()
+            lose_life_snd.play()
 
+    def temp_alerts(self):
         if self.temp_bar.fill < 20 or self.temp_bar.fill > 80:
             if not self.temp_alert_played:
                 self.app.assets.sfx["temp_alert"]["sound"].play()
@@ -144,29 +146,30 @@ class Game:
                     img = self.app.assets.images["too_cold"]
                 else:
                     img = self.app.assets.images["too_hot"]
-                InfoThing([self.all_sprites], self.cursor.rect.midtop, 300, 75, img)
+                InfoText([self.all_sprites], self.cursor.rect.midtop, 300, 75, img)
                 self.temp_alert_played = True
         else:
             self.temp_alert_played = False
 
     def cursor_collision_logic(self):
+        pos = self.cursor.rect.midtop
         if pg.sprite.spritecollide(self.cursor, self.fallers_group, True):
-            print("Hit!")
-            InfoThing([self.all_sprites], self.cursor.rect.midtop, 100, 100, self.app.assets.images["lose_life"])
+            lose_life_img = self.app.assets.images["lose_life"]
+            InfoText([self.all_sprites], pos, 100, 100, lose_life_img)
             self.lives -= 1
             self.app.assets.sfx["lose_life"]["sound"].play()
         if power_up := pg.sprite.spritecollide(self.cursor, self.power_ups_group, True):
-            InfoThing([self.all_sprites], self.cursor.rect.midtop, 100, 100, self.app.assets.images[power_up[0].effect])
-            print(power_up[0].effect)
-            self.power_up_callbacks(power_up[0].effect)
+            effect = power_up[0].effect
+            pu_img = self.app.assets.images[effect]
+            InfoText([self.all_sprites], pos, 100, 100, pu_img)
+            self.power_up_callbacks(effect)
 
     def spawn_power_ups(self):
         if self.time_since_last_power_up >= self.power_up_spawn_rate:
             min_x = self.app.screen_size[0] // 3
             max_x = (self.app.screen_size[0] // 3) * 2
             x_pos = random.randint(min_x, max_x)
-            w = 30
-            h = 30
+            w, h = 30, 30
             speed = 100
             image = self.app.assets.images["power_up"]
             image = pg.transform.smoothscale(image, (w, h))
@@ -177,7 +180,7 @@ class Game:
                 speed, 
                 image,
                 self.app.screen_size[1],
-                effect,
+                effect=effect,
             )
             self.time_since_last_power_up = 0
     
@@ -242,7 +245,7 @@ class Game:
         self.time_since_last_faller = 0
         self.time_since_last_temp_change = 0
         self.time_since_last_power_up = 0
-        self.set_level_metrics()
+        self.temp_alert_played = False
         self.curr_temp_mode = TempModes.INTRO
         self.all_sprites.empty()
         self.fallers_group.empty() 
@@ -250,7 +253,7 @@ class Game:
         self.cursor = Cursor([self.all_sprites], (50, 50), self.app.assets.images["player"])
         pg.mouse.set_pos((self.app.screen_size[0]//2, self.app.screen_size[1]//2))
         self.last_mouse_pos = self.app.screen_size[0] // 2, self.app.screen_size[1] // 2
-        self.temp_alert_played = False
+        self.set_level_metrics()
 
     def set_level_metrics(self):
         self.power_up_spawn_rate = LevelData.POWER_UP_SPAWN_RATE[f"Level_{self.level}"]

@@ -6,7 +6,14 @@ if TYPE_CHECKING:
 
 
 class ShaderPipeline:
-    def __init__(self, app: "App", uniforms_map: dict={}, vert_shader_id: str="default", frag_shader_id: str="default", has_tex: bool=True):
+    def __init__(
+            self, 
+            app: "App", 
+            uniforms_map: dict={}, 
+            vert_shader_id: str="default", 
+            frag_shader_id: str="default", 
+            has_tex: bool=True
+        ):
         self.app = app
         self.ctx = app.ctx
         self.has_tex = has_tex
@@ -14,7 +21,8 @@ class ShaderPipeline:
         self.uniforms, self.ufs_size, self.ufs_includes = self.pack_uniforms(uniforms_map)
         self.uniform_buffer = self.ctx.buffer(size=self.ufs_size)
         layout, resources = self.get_resources_and_layout()
-        constants = {"constants": f"const vec2 iResolution = vec2({self.app.screen_size[0]}.0, {self.app.screen_size[1]}.0);"}
+        vec2_screen_size_str = f"vec2({self.app.screen_size[0]}.0, {self.app.screen_size[1]}.0)"
+        constants = {"constants": f"const vec2 iResolution = {vec2_screen_size_str};"}
 
         self.pipeline = self.ctx.pipeline(
             includes=constants|self.ufs_includes,
@@ -26,7 +34,11 @@ class ShaderPipeline:
             topology='triangle_strip',
             viewport=(0, 0, *self.app.screen_size),
             vertex_count=4,
-            blend={'enable': True, 'src_color': "src_alpha", 'dst_color': "one_minus_src_alpha"},
+            blend={
+                'enable': True, 
+                'src_color': "src_alpha", 
+                'dst_color': "one_minus_src_alpha"
+            },
         )
     
     def get_resources_and_layout(self):
