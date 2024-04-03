@@ -1,12 +1,6 @@
-# ATOMIC CONVECTION
+# Game Title: ATOMIC CONVECTION
 
 An arcade style temperature themed mouse movement game, made for the Pygame-CE Spring 2024 Game Jam.
-
-## Screenshots
-![sc0](https://github.com/d-orm/pgce_2024_spring_jam/blob/main/assets/images/sc0.png)
-![sc1](https://github.com/d-orm/pgce_2024_spring_jam/blob/main/assets/images/sc0.png)
-![sc2](https://github.com/d-orm/pgce_2024_spring_jam/blob/main/assets/images/sc0.png)
-![sc3](https://github.com/d-orm/pgce_2024_spring_jam/blob/main/assets/images/sc0.png)
 
 ## Gameplay Instructions
 
@@ -27,3 +21,10 @@ pip install -r requirements.txt
 
 python main.py
 ```
+
+## Screenshots
+
+![sc0](https://github.com/d-orm/pgce_2024_spring_jam/blob/main/assets/images/sc0.png)
+![sc1](https://github.com/d-orm/pgce_2024_spring_jam/blob/main/assets/images/sc1.png)
+![sc2](https://github.com/d-orm/pgce_2024_spring_jam/blob/main/assets/images/sc2.png)
+![sc3](https://github.com/d-orm/pgce_2024_spring_jam/blob/main/assets/images/sc3.png)
