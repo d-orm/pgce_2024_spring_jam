@@ -53,37 +53,32 @@ class Intro:
         title_rect.y = self.app.screen.get_height() // 4 - self.icon.get_height() // 2 - 80
         self.app.screen.blit(self.title_img, title_rect)
 
-    def draw_instructions(self):
+    def draw_instruction_line(self, line_text: str, y_offset: int):
+        text = self.app.assets.fonts["roboto_mono"].render(line_text, True, (255, 255, 255))
+        text_rect = text.get_rect(center=self.app.screen.get_rect().center)
+        text_rect.y = self.app.screen.get_height() // 2 - 30 + y_offset
+        self.app.screen.blit(text, text_rect)
+    
+    def draw_instructions_border(self):
         text_border_rect = pg.Rect(0, 0, self.app.screen.get_width() // 1.25, 180)
         text_border_rect.center = self.app.screen.get_rect().center
-        text_border_rect.y = self.app.screen.get_height() // 2 - 30
+        text_border_rect.y = self.app.screen.get_height() // 2 - 40
         pg.draw.rect(self.app.screen, (0, 0, 0, 125), text_border_rect, border_radius=50)
         pg.draw.rect(self.app.screen, (0, 0, 0, 255), text_border_rect, width=5, border_radius=50)
-        
+
+    def draw_instructions(self):
         line_1 = "Move the mouse to avoid falling elements & collect power-ups"
-        text = self.app.assets.fonts["roboto_mono"].render(line_1, True, (255, 255, 255))
-        text_rect = text.get_rect(center=self.app.screen.get_rect().center)
-        self.app.screen.blit(text, text_rect)
-
         line_2 = "Don't move too much or too little, or risk overheat or freeze!"
-        text2 = self.app.assets.fonts["roboto_mono"].render(line_2, True, (255, 255, 255))
-        text2_rect = text2.get_rect(center=(text_rect.centerx, text_rect.centery + 60))
-        self.app.screen.blit(text2, text2_rect)
-
         line_3 = "The atmospheric temperature will effect the heating/cooling rate"
-        text3 = self.app.assets.fonts["roboto_mono"].render(line_3, True, (255, 255, 255))
-        text3_rect = text3.get_rect(center=(text_rect.centerx, text_rect.centery + 120))
-        self.app.screen.blit(text3, text3_rect)
-
         line_4 = "Press [SPACE] to start"
-        text4 = self.app.assets.fonts["roboto_mono"].render(line_4, True, (255, 255, 255))
-        text4_rect = text4.get_rect(center=(text_rect.centerx, text_rect.centery + 240))
-        self.app.screen.blit(text4, text4_rect)
-
         line_5 = "Press [M] to toggle mute, [R] to restart, [Q] to quit"
-        text5 = self.app.assets.fonts["roboto_mono"].render(line_5, True, (255, 255, 255))
-        text5_rect = text5.get_rect(center=(text_rect.centerx, text_rect.centery + 340))
-        self.app.screen.blit(text5, text5_rect)
+
+        self.draw_instructions_border()
+        self.draw_instruction_line(line_1, 0)
+        self.draw_instruction_line(line_2, 60)
+        self.draw_instruction_line(line_3, 120)
+        self.draw_instruction_line(line_4, 240)
+        self.draw_instruction_line(line_5, 340)
 
     def draw_logos(self):
         pg_logo_x_pos = self.app.screen.get_width() - 200

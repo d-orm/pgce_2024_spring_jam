@@ -17,7 +17,7 @@ class Assets:
         self.images: dict[str, pg.Surface] = {
             "title": pg.image.load("assets/images/title.png").convert_alpha(),
             "thermometer": pg.image.load("assets/images/thermometer.png").convert_alpha(),
-            "player": pg.image.load("assets/images/player2.png").convert_alpha(),
+            "player": pg.image.load("assets/images/player.png").convert_alpha(),
             "power_up": pg.image.load("assets/images/power_up.png").convert_alpha(),
             "lose_life": self.create_info_text("-1 Life", (255, 0, 0)),
             "score": self.create_info_text("+250 Score", (255, 255, 255)),
